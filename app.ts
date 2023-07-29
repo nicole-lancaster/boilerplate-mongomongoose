@@ -1,5 +1,5 @@
 require("dotenv").config();
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
@@ -99,17 +99,17 @@ const removeManyPeople = async (done) => {
   return done(null, deletedPerson);
 };
 
-const queryChain = (done) => {
+const queryChain = async (done) => {
   const foodToSearch = "burrito";
-
-  done(null /*, data*/);
+  const queryChain = await Person.find({ favoriteFoods: foodToSearch })
+    .sort({ name: "asc" })
+    .limit(2)
+    .select("-age")
+    .exec((err, person) => {
+      if (err) return done(err);
+      return done(null, person);
+    });
 };
-
-/** **Well Done !!**
-/* You completed these challenges, let's go celebrate !
- */
-
-//----- **DO NOT EDIT BELOW THIS LINE** ----------------------------------
 
 exports.PersonModel = Person;
 exports.createAndSavePerson = createAndSavePerson;
