@@ -1,22 +1,37 @@
 require("dotenv").config();
 import mongoose from "mongoose";
 
-mongoose.connect(process.env.MONGO_URI, {
+type EnvVariables = {
+  MONGO_URI: string;
+};
+
+type PersonType = {
+  name: string;
+  age?: number;
+  favoriteFoods?: string[];
+};
+
+type DoneFunction = (
+  arg0: mongoose.NativeError | null,
+  arg1?: (PersonType & mongoose.Document<any, any, PersonType>) | undefined
+) => void;
+
+mongoose.connect((process.env as EnvVariables).MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
 
-let Person;
+let Person: mongoose.Model<PersonType, {}, {}>;
 
-const personSchema = new mongoose.Schema({
+const personSchema = new mongoose.Schema<PersonType>({
   name: { type: String, required: true },
   age: Number,
   favoriteFoods: [String],
 });
 
-Person = mongoose.model("Person", personSchema);
+Person = mongoose.model<PersonType>("Person", personSchema);
 
-const createAndSavePerson = (done) => {
+const createAndSavePerson = (done: DoneFunction) => {
   let nicole = new Person({
     name: "Nicole",
     age: 99,
@@ -28,7 +43,7 @@ const createAndSavePerson = (done) => {
   });
 };
 
-const createManyPeople = (arrayOfPeople, done) => {
+const createManyPeople = (arrayOfPeople: PersonType[], done: DoneFunction) => {
   Person.create(arrayOfPeople, (err, data) => {
     if (err) return done(err);
     return done(null, data);
